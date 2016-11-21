@@ -8,19 +8,25 @@ using namespace std;
 const int Nr = 100;					//	size in r-direction
 const int Nz = 54;					//	size in z-direction
 double T[Nr][Nz], T_next[Nr][Nz];	//	temperature in current and next moment
-double F[Nr][Nz], F_next[Nr][Nz], I[Nr][Nz];	//	reaction coefficient in current and next moment, inetnsity of laser beam
+double F[Nr][Nz], I[Nr][Nz];	//	reaction coefficient in current and next moment, inetnsity of laser beam
 int sec = 0;						//  time (sec)
 //output files
 ofstream trz0("trz0.csv"), trzh("trzh.csv"), tz("tz.csv"), frz0("frz0.csv"), frzh("frzh.csv"), fz("fz.csv");
 
 void heatingPCHM3D() {
 				
-	int time_total = 100;	//	total time in sec
+    int time_total = 100;	  //  total time in sec
 
-	double lambda = 0.16;		//	thermal conductivity
-	double C = 1240;			//	heat capacity
-	double Lx = 5e-3;			//	glass radius
-	double Lz = 2.7e-3;			//	depth
+    double lambda = 0.16;	  //	thermal conductivity
+    double C = 1240;		  //	heat capacity
+
+    double Lx = 5e-3;		  //	glass radius
+    double Lz = 2.7e-3;		  //	depth
+
+    FIX_UNUSED (Lx);
+    FIX_UNUSED (Lz);
+    //these parameters are currently unused
+
 	double I0 = 1592;			//	peak value of laser's intensity
 	double p = 1180;			//	density
 	double b = 1.8e-5;			//	reaction's speed
@@ -29,8 +35,10 @@ void heatingPCHM3D() {
 	double a = lambda / (C*p);	//	coefficient a
 	double h = 5.0e-5;			//	spatial step
 	double k0 = 528, k1 = 214;	//	exponential transmittance coefficient of glass
-	double alpha = 1 / pow(R, 2);	//	alpha coefficient
+    double alpha = 1. / pow(R, 2);	//	alpha coefficient
 	double t = 0.001*pow(h, 2) / a;	//	time step
+
+    double F_next;
 
 	//initializing initial values of intensity, temperature and concetration
 	for (int i = 0; i < Nr; i++) {
@@ -70,9 +78,9 @@ void heatingPCHM3D() {
 
 		for (int j = 0; j < Nz; j++) {
 			for (int i = 0; i < Nr; i++) {
-				F_next[i][j] = -b*t*I[i][j] * F[i][j] + F[i][j];	//reaction coefficient calculations
+                F_next = -b*t*I[i][j] * F[i][j] + F[i][j];	//reaction coefficient calculations
 				T[i][j] = T_next[i][j];
-				F[i][j] = F_next[i][j];
+                F[i][j] = F_next;
 			}
 		}
 
@@ -85,25 +93,24 @@ void heatingPCHM3D() {
 
 	}
 	tz.close(); fz.close(); trz0.close(); trzh.close(); frz0.close(); frzh.close();
-
 }
 
 
 void sendData() {
-	tz << "t= " << sec << " ;";
+    tz << "t= " << sec << " ;" << "\n";
 	for (int i = 0; i < Nr; ++i) {
-		trz0 << T[i][0] << ";";
-		trzh << T[i][Nz - 1] << ";";
-		frz0 << F[i][0] << ";";
-		frzh << F[i][Nz - 1] << ";";
+        trz0 << T[i][0] << ";" << "\n";
+        trzh << T[i][Nz - 1] << ";" << "\n";
+        frz0 << F[i][0] << ";" << "\n";
+        frzh << F[i][Nz - 1] << ";" << "\n";
 	}
 	trz0 << endl;
 	trzh << endl;
 	frz0 << endl;
 	frzh << endl;
 	for (int j = 0; j < Nz; ++j) {
-		tz << T[0][j] << ";";
-		fz << F[0][j] << ";";
+        tz << T[0][j] << ";" << "\n";
+        fz << F[0][j] << ";" << "\n";
 
 	}
 	tz << endl;

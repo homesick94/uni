@@ -6,4 +6,5 @@ int main()
 {
 	heatingPCHM3D();
 	system("pause");
+    return 0;
 }
